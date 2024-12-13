@@ -1,14 +1,21 @@
 from flask import Flask, request
 from telegram import Bot
+from telegram.utils.request import Request
 import os
 import asyncio
 
-# Токен вашого бота (замініть на ваш реальний токен)
-TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"  # Ваш токен бота
-WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # Ваш URL на Render
+# Токен бота 
+TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"  # токен бота
+WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
 
-bot = Bot(token=TOKEN)
+# Налаштування пулу з'єднань
+request = Request(con_pool_size=8)  # Збільшуємо розмір пулу
+bot = Bot(token=TOKEN, request=request)
 app = Flask(__name__)
+
+async def send_message(chat_id, text):
+    """Асинхронна функція для відправки повідомлення."""
+    await bot.send_message(chat_id=chat_id, text=text)
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
@@ -20,9 +27,9 @@ def webhook():
         
         # Використовуємо асинхронне відправлення повідомлення
         if text.lower() == "хто я?":
-            asyncio.run(bot.send_message(chat_id=chat_id, text="Хто ми?"))
+            asyncio.run(send_message(chat_id, "Хто ми?"))
         else:
-            asyncio.run(bot.send_message(chat_id=chat_id, text=f"Ви сказали: {text}"))
+            asyncio.run(send_message(chat_id, f"Ви сказали: {text}"))
     
     return "OK", 200
 
