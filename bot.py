@@ -1,5 +1,6 @@
 from flask import Flask, request
 from telegram import Bot
+from telegram import ParseMode # Імпортуємо ParseMode
 import os
 import random
 import asyncio
@@ -67,7 +68,7 @@ def webhook():
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
         # Реакція на слово "колос"
         elif "колос" in text.lower():
-            asyncio.run(send_message(chat_id, "колос для ~~підорів~~ мужиків", parse_mode="MarkdownV2"))
+             asyncio.run(send_message(chat_id, "колос для ~~підорів~~ мужиків", parse_mode=ParseMode.MARKDOWN_V2))
     
     return "OK", 200
 
