@@ -1,6 +1,6 @@
 from flask import Flask, request
 from telegram import Bot
-from telegram import ParseMode # Імпортуємо ParseMode
+from telegram.constants import ParseMode
 import os
 import random
 import asyncio
