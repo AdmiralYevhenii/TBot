@@ -3,6 +3,7 @@ from telegram import Bot
 import os
 import random
 import asyncio
+import time
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -10,15 +11,16 @@ WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
 
 app = Flask(__name__)
 
+# Словник для зберігання кількості символів і часу для кожного користувача
+user_char_count = {}
+user_last_message_time = {}
+
 # Читання списку відповідей з файлу
 def load_responses():
     with open("responses.txt", "r", encoding="utf-8") as file:
         return file.readlines()
 
 responses = load_responses()
-
-# Словник для зберігання кількості символів, надрукованих кожним користувачем
-user_char_count = {}
 
 async def send_message(chat_id, text):
     """Асинхронна функція для відправки повідомлення."""
@@ -32,17 +34,7 @@ def generate_shishka():
         weights=[50, 25, 10, 5, 1], k=1
     )[0]
     
-    # Визначаємо, в який діапазон потрапило число
-    if 5 <= random_choice <= 15:
-        return f"Твоя шишка {random_choice} см"
-    elif 15 < random_choice <= 20:
-        return f"Твоя шишка {random_choice} см"
-    elif 20 < random_choice <= 25:
-        return f"Твоя шишка {random_choice} см"
-    elif 25 < random_choice <= 30:
-        return f"Твоя шишка {random_choice} см"
-    else:
-        return f"Твоя шишка {random_choice} см, їбать ти лох"  # Для випадку, якщо випало 1
+    return f"Твоя шишка {random_choice} см" if random_choice != 1 else f"Твоя шишка {random_choice} см, їбать ти лох"  # Для випадку, якщо випало 1
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
@@ -52,51 +44,57 @@ def webhook():
         chat_id = update["message"]["chat"]["id"]
         text = update["message"].get("text", "")
         user_name = update["message"]["from"].get("first_name", "Невідомий")
-
-        # Рахуємо кількість символів
-        char_count = len(text)
-        if user_name in user_char_count:
-            user_char_count[user_name] += char_count
-        else:
-            user_char_count[user_name] = char_count
+        current_time = time.time()  # поточний час в секундах
         
-        # Перевірка, чи команда починається з "!".
+        # Перевірка на наявність користувача в словнику
+        if chat_id not in user_char_count:
+            user_char_count[chat_id] = 0
+            user_last_message_time[chat_id] = current_time
+        
+        # Рахуємо кількість символів в повідомленні
+        message_length = len(text)
+
+        # Перевірка, чи перевищує кількість символів 800 за останні 10 хвилин
+        time_difference = current_time - user_last_message_time[chat_id]
+        if time_difference <= 600:  # 10 хвилин = 600 секунд
+            user_char_count[chat_id] += message_length
+        else:
+            user_char_count[chat_id] = message_length  # Скидаємо лічильник, якщо час між повідомленнями більше 10 хвилин
+
+        # Оновлюємо час останнього повідомлення
+        user_last_message_time[chat_id] = current_time
+
+        if user_char_count[chat_id] >= 800:
+            # Якщо кількість символів перевищує 800 за останні 10 хвилин
+            if user_name == "Денис":  # Перевірка на ім'я
+                asyncio.run(send_message(chat_id, "Денис, сходи попісяй"))
+                # Скидаємо лічильник після відправлення повідомлення
+                user_char_count[chat_id] = 0
+        
+        # Перевірка, чи команда починається з "!"
         if text.startswith("!"):
-            # Якщо команда "!хто я?"
             if text.lower() == "!хто я?":
                 random_response = random.choice(responses).strip()
                 asyncio.run(send_message(chat_id, random_response))
-            # Якщо команда "!help"
             elif text.lower() == "!help":
                 help_text = (
                     "Команди бота:\n"
-                    "!хто я? - отримати випадкову відповідь про себе\n"
-                    "!шишка - отримати випадкову шишку\n"
-                    "!напиздів - отримати кількість символів, написаних вами\n"
-                    "!help - отримати список доступних команд"
+                    "!хто я? - Дізнайся хто ти\n"
+                    "!шишка - Показати всім якого розміру твоя шишка""
                 )
                 asyncio.run(send_message(chat_id, help_text))
-            # Якщо команда "!шишка"
             elif text.lower() == "!шишка":
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, shishka_response))
-            # Якщо команда "!напиздів"
-            elif text.lower() == "!напиздів":
-                user_characters = user_char_count.get(user_name, 0)
-                asyncio.run(send_message(chat_id, f"Ти напиздів {user_characters} символів."))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
-        
-        # Якщо повідомлення містить слово "колос"
-        if "колос" in text.lower():
+        # Реакція на конкретне слово "колос"
+        elif "колос" in text.lower():
             asyncio.run(send_message(chat_id, "колос для мужиків"))
-
+    
     return "OK", 200
 
 if __name__ == "__main__":
-    # Встановлення вебхука
     bot = Bot(token=TOKEN)
     bot.set_webhook(url=f"{WEBHOOK_URL}/{TOKEN}")
-
-    # Запускаємо Flask сервер
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
