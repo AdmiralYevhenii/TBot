@@ -1,6 +1,5 @@
 from flask import Flask, request
 from telegram import Bot
-from telegram.constants import ParseMode
 import os
 import random
 import asyncio
@@ -55,9 +54,8 @@ def webhook():
             elif text.lower() == "!help":
                 help_text = (
                     "Команди бота:\n"
-                    "!хто я? - отримати випадкову відповідь про себе\n"
-                    "!шишка - отримати випадкову шишку\n"
-                    "!help - отримати список доступних команд"
+                    "!хто я? - Дізнайся хто ти\n"
+                    "!шишка - Показати всім якого розміру твоя шишка"
                 )
                 asyncio.run(send_message(chat_id, help_text))
             # Якщо команда "!шишка"
@@ -68,7 +66,7 @@ def webhook():
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
         # Реакція на слово "колос"
         elif "колос" in text.lower():
-             asyncio.run(send_message(chat_id, "колос для ~~підорів~~ мужиків", parse_mode=ParseMode.MARKDOWN_V2))
+             asyncio.run(send_message(chat_id, "колос для підорів"))
     
     return "OK", 200
 
