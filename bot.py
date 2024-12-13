@@ -39,7 +39,7 @@ def generate_shishka():
     elif 25 < random_choice <= 30:
         return f"Твоя шишка {random_choice} см"
     else:
-        return f"Твоя шишка {random_choice} см"  # Для випадку, якщо випало 1
+        return f"Твоя шишка {random_choice} см, їбать ти лох"  # Для випадку, якщо випало 1
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
