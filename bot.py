@@ -73,7 +73,7 @@ def webhook():
 
         # Перевірка, чи користувач перевищив 800 символів за останні 10 хвилин
         if user_char_count[username] >= 800:
-            asyncio.run(send_message(chat_id, f"{username}, сходи попісяй"))
+            asyncio.run(send_message(chat_id, f"@{username}, сходи попісяй"))
             user_char_count[username] = 0  # Скидаємо лічильник після відповіді
 
         # Перевірка, чи команда починається з "!"
@@ -98,7 +98,7 @@ def webhook():
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
         # Якщо в чаті зустрічається слово "колос"
         elif "колос" in text.lower():
-            asyncio.run(send_message(chat_id, "колос для мужиків"))
+            asyncio.run(send_message(chat_id, "колос для підарів"))
     
     return "OK", 200
 
