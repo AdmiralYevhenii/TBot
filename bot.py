@@ -101,9 +101,10 @@ def webhook():
             elif text.lower() == "!шишка":
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, shishka_response))
-                # Якщо команда "!коктель"
+            # Якщо команда "!коктель"
             elif text.lower() == "!коктель":
-                cocktail = random.choice(cocktail)
+                cocktails = load_cocktails()  # Завантажуємо коктейлі
+                cocktail = random.choice(cocktails)  # Вибираємо випадковий коктейль
                 ingredients = "\n".join(cocktail["ingredients"])
                 preparation = cocktail["preparation"]
                 cocktail_response = (
