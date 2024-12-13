@@ -67,7 +67,7 @@ def webhook():
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
         # Реакція на слово "колос"
         elif "колос" in text.lower():
-            asyncio.run(send_message(chat_id, "колос для ~підорів~ мужиків"))
+            asyncio.run(send_message(chat_id, "колос для ~~підорів~~ мужиків"))
     
     return "OK", 200
 
