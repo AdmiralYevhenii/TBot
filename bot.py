@@ -22,6 +22,25 @@ async def send_message(chat_id, text):
     bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=text)
 
+# Функція для генерації шишки
+def generate_shishka():
+    random_choice = random.choices(
+        [random.randint(5, 15), random.randint(15, 20), random.randint(20, 25), random.randint(25, 30), 1], 
+        weights=[50, 25, 10, 5, 1], k=1
+    )[0]
+    
+    # Визначаємо, в який діапазон потрапило число
+    if 5 <= random_choice <= 15:
+        return f"Твоя шишка {random_choice} см"
+    elif 15 < random_choice <= 20:
+        return f"Твоя шишка {random_choice} см"
+    elif 20 < random_choice <= 25:
+        return f"Твоя шишка {random_choice} см"
+    elif 25 < random_choice <= 30:
+        return f"Твоя шишка {random_choice} см"
+    else:
+        return f"Твоя шишка {random_choice} см"  # Для випадку, якщо випало 1
+
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     update = request.get_json()
@@ -41,9 +60,14 @@ def webhook():
                 help_text = (
                     "Команди бота:\n"
                     "!хто я? - отримати випадкову відповідь про себе\n"
+                    "!шишка - отримати випадкову шишку\n"
                     "!help - отримати список доступних команд"
                 )
                 asyncio.run(send_message(chat_id, help_text))
+            # Якщо команда "!шишка"
+            elif text.lower() == "!шишка":
+                shishka_response = generate_shishka()
+                asyncio.run(send_message(chat_id, shishka_response))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
     
