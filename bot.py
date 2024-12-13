@@ -4,6 +4,7 @@ import os
 import random
 import asyncio
 import time
+import json
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -21,6 +22,11 @@ def load_responses():
         return file.readlines()
 
 responses = load_responses()
+
+# Читання списку коктейлів з файлу
+def load_cocktails():
+    with open("cocktails.json", "r", encoding="utf-8") as file:
+        return json.load(file)
 
 async def send_message(chat_id, text):
     """Асинхронна функція для відправки повідомлення."""
@@ -73,7 +79,7 @@ def webhook():
 
         # Перевірка, чи користувач перевищив 800 символів за останні 10 хвилин
         if user_char_count[username] >= 800:
-            asyncio.run(send_message(chat_id, f"@{username}, сходи попісяй"))
+            asyncio.run(send_message(chat_id, f"{username}, сходи попісяй"))
             user_char_count[username] = 0  # Скидаємо лічильник після відповіді
 
         # Перевірка, чи команда починається з "!"
@@ -87,13 +93,25 @@ def webhook():
                 help_text = (
                     "Команди бота:\n"
                     "!хто я? - Дізнайся хто ти\n"
-                    "!шишка - Показати всім якого розміру твоя шишка"
+                    "!шишка - Показати всім якого розміру твоя шишка\n"
+                    "!коктель - отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text))
             # Якщо команда "!шишка"
             elif text.lower() == "!шишка":
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, shishka_response))
+                # Якщо команда "!коктель"
+            elif text.lower() == "!коктель":
+                cocktail = random.choice(cocktail)
+                ingredients = "\n".join(cocktail["ingredients"])
+                preparation = cocktail["preparation"]
+                cocktail_response = (
+                    f"Коктейль: {cocktail['name']}\n"
+                    f"Складові:\n{ingredients}\n"
+                    f"Як приготувати:\n{preparation}"
+                )
+                asyncio.run(send_message(chat_id, cocktail_response))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
         # Якщо в чаті зустрічається слово "колос"
