@@ -1,6 +1,7 @@
 from flask import Flask, request
 from telegram import Bot
 import os
+import asyncio
 
 # Токен вашого бота (замініть на ваш реальний токен)
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"  # Ваш токен бота
@@ -17,11 +18,11 @@ def webhook():
         chat_id = update["message"]["chat"]["id"]
         text = update["message"].get("text", "")
         
-        # Відповідь на запитання "Хто я?"
+        # Використовуємо асинхронне відправлення повідомлення
         if text.lower() == "хто я?":
-            bot.send_message(chat_id=chat_id, text="Хто ми?")
+            asyncio.run(bot.send_message(chat_id=chat_id, text="Хто ми?"))
         else:
-            bot.send_message(chat_id=chat_id, text=f"Ви сказали: {text}")
+            asyncio.run(bot.send_message(chat_id=chat_id, text=f"Ви сказали: {text}"))
     
     return "OK", 200
 
