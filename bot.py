@@ -1,14 +1,21 @@
 from flask import Flask, request
 from telegram import Bot
-from telegram.ext import Application, CommandHandler, ContextTypes
 import os
+import random
 import asyncio
 
-# Токен вашого бота
-TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"  # Ваш токен бота
-WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # Ваш URL на Render
+# Токен бота
+TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
+WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
 
 app = Flask(__name__)
+
+# Читання списку відповідей з файлу
+def load_responses():
+    with open("responses.txt", "r", encoding="utf-8") as file:
+        return file.readlines()
+
+responses = load_responses()
 
 async def send_message(chat_id, text):
     """Асинхронна функція для відправки повідомлення."""
@@ -23,11 +30,22 @@ def webhook():
         chat_id = update["message"]["chat"]["id"]
         text = update["message"].get("text", "")
         
-        # Використовуємо асинхронне відправлення повідомлення
-        if text.lower() == "хто я?":
-            asyncio.run(send_message(chat_id, "Хто ми?"))
-        else:
-            asyncio.run(send_message(chat_id, f"Ви сказали: {text}"))
+        # Перевірка, чи команда починається з "!".
+        if text.startswith("!"):
+            # Якщо команда "!хто я?"
+            if text.lower() == "!хто я?":
+                random_response = random.choice(responses).strip()
+                asyncio.run(send_message(chat_id, random_response))
+            # Якщо команда "!help"
+            elif text.lower() == "!help":
+                help_text = (
+                    "Команди бота:\n"
+                    "!хто я? - отримати випадкову відповідь про себе\n"
+                    "!help - отримати список доступних команд"
+                )
+                asyncio.run(send_message(chat_id, help_text))
+            else:
+                asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '!help' для допомоги."))
     
     return "OK", 200
 
