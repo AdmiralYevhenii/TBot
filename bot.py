@@ -4,13 +4,15 @@ import asyncio
 import json
 from flask import Flask, request
 from telegram import Bot
+import os
 import openai
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
 WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
 
-openai.api_key = "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"  # Замість на ваш API ключ
+openai.api_key = os.getenv("OPENAI_API_KEY")  # Отримання ключа API з середовища
+
 
 app = Flask(__name__)
 
