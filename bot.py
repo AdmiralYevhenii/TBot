@@ -66,6 +66,10 @@ def webhook():
         # Логування отриманого тексту
         print(f"Received message: {text}")
 
+        # Перевіряємо, чи команда належить нашому боту
+        if f"@{BOT_USERNAME}" not in text:
+            return "OK", 200  # Ігноруємо повідомлення, якщо команда не для нашого бота
+
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
             user_char_count[username] = 0
