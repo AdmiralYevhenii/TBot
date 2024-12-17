@@ -9,7 +9,6 @@ import json
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
 WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
-BOT_USERNAME = "PidpuvasBot"  # Ім'я вашого бота
 
 app = Flask(__name__)
 
@@ -33,6 +32,7 @@ async def send_message(chat_id, text, message_id=None):
     """Асинхронна функція для відправки повідомлення як відповідь."""
     bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
+
 
 # Функція для генерації шишки
 def generate_shishka():
@@ -63,13 +63,6 @@ def webhook():
         text = update["message"].get("text", "")
         message_time = time.time()
 
-        # Логування отриманого тексту
-        print(f"Received message: {text}")
-
-        # Перевіряємо, чи команда належить нашому боту
-        if f"@{BOT_USERNAME}" not in text:
-            return "OK", 200  # Ігноруємо повідомлення, якщо команда не для нашого бота
-
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
             user_char_count[username] = 0
@@ -86,37 +79,43 @@ def webhook():
             asyncio.run(send_message(chat_id, f"{username}, сходи попісяй", message_id))
             user_char_count[username] = 0
 
-        # Перевірка на команду
+        # Обробка команд
         if text.startswith("/"):
-            # Перевірка для команд з ім'ям бота
-            if text.lower() == f"/whoiam@{BOT_USERNAME}".lower():
-                random_response = random.choice(responses).strip()
-                asyncio.run(send_message(chat_id, f"{random_response}", message_id))
-            elif text.lower() == f"/help@{BOT_USERNAME}".lower():
-                help_text = (
-                    "Команди бота:\n"
-                    f"/whoiam@{BOT_USERNAME} - Дізнайся хто ти\n"
-                    f"/bump@{BOT_USERNAME} - Показати всім розмір твоєї шишки\n"
-                    f"/cocktail@{BOT_USERNAME} - Отримати випадковий коктейль"
-                )
-                asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower() == f"/bump@{BOT_USERNAME}".lower():
-                shishka_response = generate_shishka()
-                asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
-            elif text.lower() == f"/cocktail@{BOT_USERNAME}".lower():
-                cocktails = load_cocktails()
-                cocktail = random.choice(cocktails)
-                ingredients = "\n".join(cocktail["ingredients"])
-                preparation = cocktail["preparation"]
-                cocktail_response = (
-                    f"Коктейль: {cocktail['name']}\n"
-                    f"Складові:\n{ingredients}\n"
-                    f"Як приготувати:\n{preparation}"
-                )
-                asyncio.run(send_message(chat_id, cocktail_response, message_id))
-            else:
-                asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
-        elif "колос" in text.lower():  # Реагує на слово "колос"
+            # Ігноруємо команди для інших ботів
+            if "@PidpuvasBot" in text:
+                # Перевірка на конкретні команди бота
+                if text.lower() == "/whoiam@PidpuvasBot":
+                    random_response = random.choice(responses).strip()
+                    asyncio.run(send_message(chat_id, f"{random_response}", message_id))
+                elif text.lower() == "/help@PidpuvasBot":
+                    help_text = (
+                        "Команди бота:\n"
+                        "/whoiam - Дізнайся хто ти\n"
+                        "/bump - Показати всім розмір твоєї шишки\n"
+                        "/cocktail - Отримати випадковий коктейль"
+                    )
+                    asyncio.run(send_message(chat_id, help_text, message_id))
+                elif text.lower() == "/bump@PidpuvasBot":
+                    shishka_response = generate_shishka()
+                    asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
+                elif text.lower() == "/cocktail@PidpuvasBot":
+                    cocktails = load_cocktails()
+                    cocktail = random.choice(cocktails)
+                    ingredients = "\n".join(cocktail["ingredients"])
+                    preparation = cocktail["preparation"]
+                    cocktail_response = (
+                        f"Коктейль: {cocktail['name']}\n"
+                        f"Складові:\n{ingredients}\n"
+                        f"Як приготувати:\n{preparation}"
+                    )
+                    asyncio.run(send_message(chat_id, cocktail_response, message_id))
+                else:
+                    asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
+            # Ігноруємо команди для інших ботів
+            elif "@" in text:
+                return "OK", 200  # Ігноруємо команду
+        # Якщо в тексті є слово "колос"
+        elif "колос" in text.lower():
             asyncio.run(send_message(chat_id, "колос для підарів", message_id))
     
     return "OK", 200
