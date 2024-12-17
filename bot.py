@@ -62,6 +62,8 @@ def webhook():
         username = update["message"]["from"]["first_name"]
         text = update["message"].get("text", "")
         message_time = time.time()
+        # Логування отриманого тексту
+        print(f"Received message: {text}")
 
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
