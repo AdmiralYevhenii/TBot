@@ -124,11 +124,11 @@ def webhook():
         else:
             # Визначаємо випадковий шанс для GPT включитися в бесіду
             if random.random() < 0.05:  # 5% шанс на GPT відповідь
-                gpt_response = asyncio.run(get_gpt_response(text))  # Отримуємо відповідь від GPT
-                asyncio.ensure_future(send_message(chat_id, gpt_response, message_id))
+                gpt_response = asyncio.ensure_future(get_gpt_response(text))  # Отримуємо відповідь від GPT
+                asyncio.ensure_future(send_message(chat_id, gpt_response.result(), message_id))
             else:
                 asyncio.ensure_future(send_message(chat_id, "Я вас чую! Продовжуємо розмову.", message_id))
-
+            # заїбало
     return "OK", 200
 
 if __name__ == "__main__":
