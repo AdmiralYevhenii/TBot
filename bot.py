@@ -9,6 +9,7 @@ import json
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
 WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
+BOT_USERNAME = "PidpuvasBot"  # Ім'я вашого бота
 
 app = Flask(__name__)
 
@@ -32,7 +33,6 @@ async def send_message(chat_id, text, message_id=None):
     """Асинхронна функція для відправки повідомлення як відповідь."""
     bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
-
 
 # Функція для генерації шишки
 def generate_shishka():
@@ -84,21 +84,22 @@ def webhook():
 
         # Перевірка на команду
         if text.startswith("/"):
-            if text.lower().startswith("/whoiam"):
+            # Перевірка для команд з ім'ям бота
+            if text.lower() == f"/whoiam@{BOT_USERNAME}".lower():
                 random_response = random.choice(responses).strip()
                 asyncio.run(send_message(chat_id, f"{random_response}", message_id))
-            elif text.lower().startswith("/help"):
+            elif text.lower() == f"/help@{BOT_USERNAME}".lower():
                 help_text = (
                     "Команди бота:\n"
-                    "/whoiam - Дізнайся хто ти\n"
-                    "/bump - Показати всім розмір твоєї шишки\n"
-                    "/cocktail - Отримати випадковий коктейль"
+                    f"/whoiam@{BOT_USERNAME} - Дізнайся хто ти\n"
+                    f"/bump@{BOT_USERNAME} - Показати всім розмір твоєї шишки\n"
+                    f"/cocktail@{BOT_USERNAME} - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower().startswith("/bump"):
+            elif text.lower() == f"/bump@{BOT_USERNAME}".lower():
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
-            elif text.lower().startswith("/cocktail"):
+            elif text.lower() == f"/cocktail@{BOT_USERNAME}".lower():
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
                 ingredients = "\n".join(cocktail["ingredients"])
@@ -111,10 +112,9 @@ def webhook():
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
-        else:
-            # Якщо це не команда, бот не реагує на повідомлення
-            pass
-
+        elif "колос" in text.lower():  # Реагує на слово "колос"
+            asyncio.run(send_message(chat_id, "колос для підарів", message_id))
+    
     return "OK", 200
 
 if __name__ == "__main__":
