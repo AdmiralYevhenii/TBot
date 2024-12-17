@@ -3,7 +3,6 @@ from telegram import Bot
 import os
 import time
 import asyncio
-from commands import handle_whoiam, handle_shishka, handle_cocktail, handle_help  # Імпорт команд
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -56,12 +55,16 @@ async def webhook():
         # Перевірка на команду
         if text.startswith("/"):
             if text.lower().startswith("/whoiam"):
+                from commands import handle_whoiam  # Імпорт всередині функції
                 await handle_whoiam(chat_id, bot)
             elif text.lower().startswith("/help"):
+                from commands import handle_help  # Імпорт всередині функції
                 await handle_help(chat_id, bot)
             elif text.lower().startswith("/shishka"):
+                from commands import handle_shishka  # Імпорт всередині функції
                 await handle_shishka(chat_id, bot)
             elif text.lower().startswith("/cocktail"):
+                from commands import handle_cocktail  # Імпорт всередині функції
                 await handle_cocktail(chat_id, bot)
             else:
                 await send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id)
