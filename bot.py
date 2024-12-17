@@ -87,9 +87,9 @@ def webhook():
             elif text.lower() == "/help":
                 help_text = (
                     "Команди бота:\n"
-                    "/whoiam@PidpuvasBot - Дізнайся хто ти\n"
-                    "/bump@PidpuvasBot - Показати всім розмір твоєї шишки\n"
-                    "/cocktail@PidpuvasBot - Отримати випадковий коктейль"
+                    "/whoiam - Дізнайся хто ти\n"
+                    "/bump - Показати всім розмір твоєї шишки\n"
+                    "/cocktail - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
             elif text.lower() == "/bump":
