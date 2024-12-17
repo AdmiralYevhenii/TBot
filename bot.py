@@ -63,6 +63,9 @@ def webhook():
         text = update["message"].get("text", "")
         message_time = time.time()
 
+        # Логування отриманого тексту
+        print(f"Received message: {text}")
+
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
             user_char_count[username] = 0
@@ -79,11 +82,11 @@ def webhook():
             asyncio.run(send_message(chat_id, f"{username}, сходи попісяй", message_id))
             user_char_count[username] = 0
 
-        # Обробка команд з тегом бота
-        if text.lower().startswith("/whoiam@PidpuvasBot"):
+        # Універсальна обробка команд, яка не вимагає вказувати ім'я бота
+        if text.lower().startswith("/whoiam"):
             random_response = random.choice(responses).strip()
             asyncio.run(send_message(chat_id, f"{random_response}", message_id))
-        elif text.lower().startswith("/help@PidpuvasBot"):
+        elif text.lower().startswith("/help"):
             help_text = (
                 "Команди бота:\n"
                 "/whoiam - Дізнайся хто ти\n"
@@ -91,10 +94,10 @@ def webhook():
                 "/cocktail - Отримати випадковий коктейль"
             )
             asyncio.run(send_message(chat_id, help_text, message_id))
-        elif text.lower().startswith("/bump@PidpuvasBot"):
+        elif text.lower().startswith("/bump"):
             shishka_response = generate_shishka()
             asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
-        elif text.lower().startswith("/cocktail@PidpuvasBot"):
+        elif text.lower().startswith("/cocktail"):
             cocktails = load_cocktails()
             cocktail = random.choice(cocktails)
             ingredients = "\n".join(cocktail["ingredients"])
