@@ -101,7 +101,7 @@ def webhook():
                     "/cocktail - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower().startswith("/shishka"):  # Замінили bump на shishka
+            elif text.lower().startswith("/shishka"):
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
             elif text.lower().startswith("/cocktail"):
@@ -122,6 +122,8 @@ def webhook():
             pass
 
     return "OK", 200
+
+            #заїбав
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
