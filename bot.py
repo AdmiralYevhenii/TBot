@@ -16,9 +16,11 @@ app = Flask(__name__)
 user_char_count = {}
 user_last_message_time = {}
 
+# Ініціалізуємо бот
+bot = Bot(token=TOKEN)
+
 async def send_message(chat_id, text, message_id=None):
     """Асинхронна функція для відправки повідомлення як відповідь."""
-    bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -54,19 +56,20 @@ def webhook():
         # Перевірка на команду
         if text.startswith("/"):
             if text.lower().startswith("/whoiam"):
-                handle_whoiam(chat_id, Bot(token=TOKEN))
+                handle_whoiam(chat_id, bot)
             elif text.lower().startswith("/help"):
-                handle_help(chat_id, Bot(token=TOKEN))
+                handle_help(chat_id, bot)
             elif text.lower().startswith("/shishka"):
-                handle_shishka(chat_id, Bot(token=TOKEN))
+                handle_shishka(chat_id, bot)
             elif text.lower().startswith("/cocktail"):
-                handle_cocktail(chat_id, Bot(token=TOKEN))
+                handle_cocktail(chat_id, bot)
             else:
                 send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id)
 
     return "OK", 200
-
+        #Заїбав
+        #Заїбав
+        #Заїбав
 if __name__ == "__main__":
-    bot = Bot(token=TOKEN)
     bot.set_webhook(url=f"{WEBHOOK_URL}/{TOKEN}")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
