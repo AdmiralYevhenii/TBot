@@ -84,22 +84,21 @@ def webhook():
 
         # Перевірка на команду
         if text.startswith("/"):
-            # Перевірка для команд з ім'ям бота
-            if text.lower() == f"/whoiam@{BOT_USERNAME}".lower():
+            if text.lower().startswith("/whoiam"):
                 random_response = random.choice(responses).strip()
                 asyncio.run(send_message(chat_id, f"{random_response}", message_id))
-            elif text.lower() == f"/help@{BOT_USERNAME}".lower():
+            elif text.lower().startswith("/help"):
                 help_text = (
                     "Команди бота:\n"
-                    f"/whoiam@{BOT_USERNAME} - Дізнайся хто ти\n"
-                    f"/bump@{BOT_USERNAME} - Показати всім розмір твоєї шишки\n"
-                    f"/cocktail@{BOT_USERNAME} - Отримати випадковий коктейль"
+                    "/whoiam - Дізнайся хто ти\n"
+                    "/bump - Показати всім розмір твоєї шишки\n"
+                    "/cocktail - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower() == f"/bump@{BOT_USERNAME}".lower():
+            elif text.lower().startswith("/bump"):
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
-            elif text.lower() == f"/cocktail@{BOT_USERNAME}".lower():
+            elif text.lower().startswith("/cocktail"):
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
                 ingredients = "\n".join(cocktail["ingredients"])
@@ -112,9 +111,10 @@ def webhook():
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
-        elif "колос" in text.lower():  # Реагує на слово "колос"
-            asyncio.run(send_message(chat_id, "колос для підарів", message_id))
-    
+        else:
+            # Якщо це не команда, бот не реагує на повідомлення
+            pass
+
     return "OK", 200
 
 if __name__ == "__main__":
