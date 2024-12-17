@@ -97,11 +97,11 @@ def webhook():
                 help_text = (
                     "Команди бота:\n"
                     "/whoiam - Дізнайся хто ти\n"
-                    "/bump - Показати всім розмір твоєї шишки\n"
+                    "/shishka - Показати всім розмір твоєї шишки\n"
                     "/cocktail - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower().startswith("/bump"):
+            elif text.lower().startswith("/shishka"):  # Замінили bump на shishka
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
             elif text.lower().startswith("/cocktail"):
