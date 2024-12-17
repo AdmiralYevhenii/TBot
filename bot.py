@@ -84,10 +84,11 @@ def webhook():
 
         # Перевірка на команду
         if text.startswith("/"):
-            if text.lower().startswith(f"/whoiam@{BOT_USERNAME}"):
+            # Перевірка для команд з ім'ям бота
+            if text.lower() == f"/whoiam@{BOT_USERNAME}".lower():
                 random_response = random.choice(responses).strip()
                 asyncio.run(send_message(chat_id, f"{random_response}", message_id))
-            elif text.lower().startswith(f"/help@{BOT_USERNAME}"):
+            elif text.lower() == f"/help@{BOT_USERNAME}".lower():
                 help_text = (
                     "Команди бота:\n"
                     f"/whoiam@{BOT_USERNAME} - Дізнайся хто ти\n"
@@ -95,10 +96,10 @@ def webhook():
                     f"/cocktail@{BOT_USERNAME} - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
-            elif text.lower().startswith(f"/bump@{BOT_USERNAME}"):
+            elif text.lower() == f"/bump@{BOT_USERNAME}".lower():
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
-            elif text.lower().startswith(f"/cocktail@{BOT_USERNAME}"):
+            elif text.lower() == f"/cocktail@{BOT_USERNAME}".lower():
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
                 ingredients = "\n".join(cocktail["ingredients"])
