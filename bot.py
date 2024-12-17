@@ -111,10 +111,9 @@ def webhook():
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
             else:
                 asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
-        else:
-            # Якщо це не команда, бот не реагує на повідомлення
-            pass
-
+        elif "колос" in text.lower():  # Реагує на слово "колос"
+            asyncio.run(send_message(chat_id, "колос для підарів", message_id))
+    
     return "OK", 200
 
 if __name__ == "__main__":
