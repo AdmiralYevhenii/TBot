@@ -1,18 +1,14 @@
-import random
-import time
-import asyncio
-import json
 from flask import Flask, request
 from telegram import Bot
 import os
-import openai
+import random
+import asyncio
+import time
+import json
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
 WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
-
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Отримання ключа API з середовища
-
 
 app = Flask(__name__)
 
@@ -32,20 +28,10 @@ def load_cocktails():
     with open("cocktails.json", "r", encoding="utf-8") as file:
         return json.load(file)
 
-async def send_message(chat_id, text, message_id=None):
-    """Асинхронна функція для відправки повідомлення як відповідь."""
+async def send_message(chat_id, text):
+    """Асинхронна функція для відправки повідомлення."""
     bot = Bot(token=TOKEN)
-    await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
-
-async def get_gpt_response(prompt):
-    """Отримати відповідь від GPT-3 за допомогою OpenAI API."""
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150,  # Максимальна кількість токенів для відповіді
-        temperature=0.7,  # Впливає на креативність відповіді
-    )
-    return response.choices[0].text.strip()
+    await bot.send_message(chat_id=chat_id, text=text)
 
 # Функція для генерації шишки
 def generate_shishka():
@@ -71,7 +57,6 @@ def webhook():
 
     if "message" in update:
         chat_id = update["message"]["chat"]["id"]
-        message_id = update["message"]["message_id"]  # ID повідомлення для відповіді
         username = update["message"]["from"]["first_name"]
         text = update["message"].get("text", "")
         message_time = time.time()
@@ -89,14 +74,14 @@ def webhook():
 
         # Перевірка на 800 символів
         if user_char_count[username] >= 800:
-            asyncio.ensure_future(send_message(chat_id, f"{username}, сходи попісяй", message_id))
+            asyncio.run(send_message(chat_id, f"{username}, сходи попісяй"))
             user_char_count[username] = 0
 
-        # Обробка команд
+        # Перевірка на команди
         if text.startswith("/"):
             if text.lower() == "/whoiam":
                 random_response = random.choice(responses).strip()
-                asyncio.ensure_future(send_message(chat_id, random_response, message_id))
+                asyncio.run(send_message(chat_id, random_response))
             elif text.lower() == "/help":
                 help_text = (
                     "Команди бота:\n"
@@ -104,10 +89,10 @@ def webhook():
                     "/bump - Показати всім розмір твоєї шишки\n"
                     "/cocktail - Отримати випадковий коктейль"
                 )
-                asyncio.ensure_future(send_message(chat_id, help_text, message_id))
+                asyncio.run(send_message(chat_id, help_text))
             elif text.lower() == "/bump":
                 shishka_response = generate_shishka()
-                asyncio.ensure_future(send_message(chat_id, shishka_response, message_id))
+                asyncio.run(send_message(chat_id, shishka_response))
             elif text.lower() == "/cocktail":
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
@@ -118,17 +103,12 @@ def webhook():
                     f"Складові:\n{ingredients}\n"
                     f"Як приготувати:\n{preparation}"
                 )
-                asyncio.ensure_future(send_message(chat_id, cocktail_response, message_id))
+                asyncio.run(send_message(chat_id, cocktail_response))
             else:
-                asyncio.ensure_future(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
-        else:
-            # Визначаємо випадковий шанс для GPT включитися в бесіду
-            if random.random() < 0.05:  # 5% шанс на GPT відповідь
-                gpt_response = asyncio.ensure_future(get_gpt_response(text))  # Отримуємо відповідь від GPT
-                asyncio.ensure_future(send_message(chat_id, gpt_response.result(), message_id))
-            else:
-                asyncio.ensure_future(send_message(chat_id, "Я вас чую! Продовжуємо розмову.", message_id))
-            # заїбало
+                asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги."))
+        elif "колос" in text.lower():
+            asyncio.run(send_message(chat_id, "колос для підарів"))
+    
     return "OK", 200
 
 if __name__ == "__main__":
