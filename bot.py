@@ -83,25 +83,25 @@ def webhook():
         if text.startswith("/"):
             if text.lower() == "/whoiam":
                 random_response = random.choice(responses).strip()
-                asyncio.run(send_message(chat_id, random_response, message_id))
+                asyncio.run(send_message(chat_id, f"{random_response} @PidpuvasBot", message_id))
             elif text.lower() == "/help":
                 help_text = (
                     "Команди бота:\n"
-                    "/whoiam - Дізнайся хто ти\n"
-                    "/bump - Показати всім розмір твоєї шишки\n"
-                    "/cocktail - Отримати випадковий коктейль"
+                    "/whoiam@PidpuvasBot - Дізнайся хто ти\n"
+                    "/bump@PidpuvasBot - Показати всім розмір твоєї шишки\n"
+                    "/cocktail@PidpuvasBot - Отримати випадковий коктейль"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
             elif text.lower() == "/bump":
                 shishka_response = generate_shishka()
-                asyncio.run(send_message(chat_id, shishka_response, message_id))
+                asyncio.run(send_message(chat_id, f"{shishka_response} @PidpuvasBot", message_id))
             elif text.lower() == "/cocktail":
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
                 ingredients = "\n".join(cocktail["ingredients"])
                 preparation = cocktail["preparation"]
                 cocktail_response = (
-                    f"Коктейль: {cocktail['name']}\n"
+                    f"Коктейль: {cocktail['name']} @PidpuvasBot\n"
                     f"Складові:\n{ingredients}\n"
                     f"Як приготувати:\n{preparation}"
                 )
