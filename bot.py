@@ -24,7 +24,7 @@ async def send_message(chat_id, text, message_id=None):
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 @app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
+async def webhook():
     update = request.get_json()
 
     if "message" in update:
@@ -56,20 +56,18 @@ def webhook():
         # Перевірка на команду
         if text.startswith("/"):
             if text.lower().startswith("/whoiam"):
-                handle_whoiam(chat_id, bot)
+                await handle_whoiam(chat_id, bot)
             elif text.lower().startswith("/help"):
-                handle_help(chat_id, bot)
+                await handle_help(chat_id, bot)
             elif text.lower().startswith("/shishka"):
-                handle_shishka(chat_id, bot)
+                await handle_shishka(chat_id, bot)
             elif text.lower().startswith("/cocktail"):
-                handle_cocktail(chat_id, bot)
+                await handle_cocktail(chat_id, bot)
             else:
-                send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id)
+                await send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id)
 
     return "OK", 200
-        #Заїбав
-        #Заїбав
-        #Заїбав
+
 if __name__ == "__main__":
     bot.set_webhook(url=f"{WEBHOOK_URL}/{TOKEN}")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
