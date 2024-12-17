@@ -82,6 +82,12 @@ def webhook():
             asyncio.run(send_message(chat_id, f"{username}, сходи попісяй", message_id))
             user_char_count[username] = 0
 
+        # Ігнорування команд, адресованих іншому боту
+        if "@" in text:
+            # Перевіряємо чи команда адресована іншому боту
+            if BOT_USERNAME not in text:
+                return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
+
         # Перевірка на команду
         if text.startswith("/"):
             if text.lower().startswith("/whoiam"):
