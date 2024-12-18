@@ -115,8 +115,6 @@ def webhook():
                     f"Як приготувати:\n{preparation}"
                 )
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
-            else:
-                asyncio.run(send_message(chat_id, "Невідома команда. Використовуйте '/help' для допомоги.", message_id))
         else:
             # Якщо це не команда, бот не реагує на повідомлення
             pass
