@@ -6,6 +6,9 @@ import asyncio
 import time
 import json
 import openai
+import logging
+from collections import defaultdict
+import openai
 
 # Токен бота
 TOKEN = os.environ.get("8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4")
@@ -14,6 +17,9 @@ BOT_USERNAME = os.environ.get("PidpuvasBot")  # Ім'я бота
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 openai.api_key = OPENAI_API_KEY
+
+# Налаштування логування
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
