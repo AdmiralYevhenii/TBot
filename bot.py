@@ -8,24 +8,19 @@ import openai
 import logging
 from collections import defaultdict
 
+# Налаштування логування
+logging.basicConfig(level=logging.INFO)
+
 # Токен бота
 TOKEN = os.environ.get("8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4")
 WEBHOOK_URL = os.environ.get("https://tbot-pexl.onrender.com")  # URL на Render
 BOT_USERNAME = os.environ.get("PidpuvasBot")  # Ім'я бота
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-
-# Перевірка, чи є ключ API OpenAI
-if not OPENAI_API_KEY:
-    raise ValueError("Не знайдено OpenAI API ключ у змінних оточення.")
-
 openai.api_key = OPENAI_API_KEY
-
-# Налаштування логування
-logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
-# Зберігаємо статистику користувачів: кількість символів та час останнього повідомлення
+# Зберігаємо статистику користувачів
 user_char_count = defaultdict(int)
 user_last_message_time = defaultdict(lambda: 0)
 
@@ -36,39 +31,11 @@ def load_responses():
 
 responses = load_responses()
 
-# Читання списку коктейлів з файлу
-def load_cocktails():
-    with open("cocktails.json", "r", encoding="utf-8") as file:
-        return json.load(file)
-
-# Синхронна функція для відправки повідомлення
-def send_message_sync(chat_id, text, message_id=None):
-    bot = Bot(token=TOKEN)
-    bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
-
-# Функція для генерації шишки
-def generate_shishka():
-    random_choice = random.choices(
-        [random.randint(5, 15), random.randint(15, 20), random.randint(20, 25), random.randint(25, 30), 1], 
-        weights=[50, 25, 10, 5, 1], k=1
-    )[0]
-    
-    if 5 <= random_choice <= 15:
-        return f"Твоя шишка {random_choice} см"
-    elif 15 < random_choice <= 20:
-        return f"Твоя шишка {random_choice} см"
-    elif 20 < random_choice <= 25:
-        return f"Твоя шишка {random_choice} см"
-    elif 25 < random_choice <= 30:
-        return f"Твоя шишка {random_choice} см"
-    else:
-        return f"Твоя шишка {random_choice} см, їбать ти лох"
-
 # Функція для обробки запитів до OpenAI
 def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},
@@ -77,7 +44,13 @@ def ask_openai(prompt):
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Виникла помилка під час звернення до OpenAI: {str(e)}"
-        
+
+# Функція для відправки повідомлення
+def send_message_sync(chat_id, text, message_id=None):
+    bot = Bot(token=TOKEN)
+    bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
+
+# Маршрут для вебхука
 @app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
@@ -85,7 +58,7 @@ def webhook():
 
     if "message" in update:
         chat_id = update["message"]["chat"]["id"]
-        message_id = update["message"]["message_id"]  # ID повідомлення для відповіді
+        message_id = update["message"]["message_id"]
         username = update["message"]["from"]["first_name"]
         text = update["message"].get("text", "")
         message_time = time.time()
@@ -94,6 +67,10 @@ def webhook():
         logging.info(f"Received message: {text}")
 
         # Оновлюємо кількість символів для користувача
+        if username not in user_char_count:
+            user_char_count[username] = 0
+            user_last_message_time[username] = message_time
+
         if message_time - user_last_message_time[username] > 600:
             user_char_count[username] = 0
 
@@ -107,7 +84,7 @@ def webhook():
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text and BOT_USERNAME not in text:
-            return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
+            return "OK", 200
 
         # Перевірка на команду
         if text.startswith("/"):
@@ -144,8 +121,6 @@ def webhook():
                     send_message_sync(chat_id, openai_response, message_id)
                 else:
                     send_message_sync(chat_id, "Будь ласка, введіть текст запиту після команди /ask.", message_id)
-        else:
-            pass
 
     return "OK", 200
 
