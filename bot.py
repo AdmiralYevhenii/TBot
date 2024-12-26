@@ -77,10 +77,11 @@ def ask_openai(prompt):
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Виникла помилка під час звернення до OpenAI: {str(e)}"
-
-@app.route(f"/{TOKEN}", methods=["POST"])
+        
+@app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
+    logging.info(f"Received update: {json.dumps(update, ensure_ascii=False)}")
 
     if "message" in update:
         chat_id = update["message"]["chat"]["id"]
@@ -150,5 +151,5 @@ def webhook():
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
-    bot.set_webhook(url=f"{WEBHOOK_URL}/{TOKEN}")
+    bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")  # Використовуємо новий маршрут
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
