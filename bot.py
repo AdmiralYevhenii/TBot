@@ -5,16 +5,16 @@ import random
 import asyncio
 import time
 import json
-import os
 import openai
-
+import os
 
 # Отримання OpenAI API ключа
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Перевірка, чи ключ отримано
 if not OPENAI_API_KEY:
     raise ValueError("Не знайдено OpenAI API ключ у змінних оточення.")
+
+openai.api_key = OPENAI_API_KEY
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -63,15 +63,17 @@ def generate_shishka():
         return f"Твоя шишка {random_choice} см, їбать ти лох"
 
 def get_openai_response(prompt):
-    openai.api_key = OPENAI_API_KEY
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Можете використати інший двигун, наприклад, "gpt-4"
-            prompt=prompt,
-            max_tokens=150,  # Кількість токенів у відповіді
-            temperature=0.7  # Креативність відповіді
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Або використовуйте "gpt-3.5-turbo" для економії коштів
+            messages=[
+                {"role": "system", "content": "Ти є корисним помічником."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=150
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Помилка: {str(e)}"
 
@@ -90,15 +92,14 @@ def webhook():
         # Логування отриманого тексту
         print(f"Received message: {text}")
 
-        # Обробка команди /ask
         if text.startswith("/ask"):
             prompt = text[len("/ask "):].strip()
             if prompt:
                 response = get_openai_response(prompt)
                 asyncio.run(send_message(chat_id, response, message_id))
             else:
-                asyncio.run(send_message(chat_id, "Введіть запит після команди /ask.", message_id))
-
+                asyncio.run(send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id))
+                
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
             user_char_count[username] = 0
