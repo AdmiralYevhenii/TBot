@@ -8,9 +8,9 @@ import json
 import openai
 
 # Токен бота
-TOKEN = os.environ.get("TELEGRAM_TOKEN")
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  # URL на Render
-BOT_USERNAME = os.environ.get("BOT_USERNAME")  # Ім'я бота
+TOKEN = os.environ.get("8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4")
+WEBHOOK_URL = os.environ.get("https://tbot-pexl.onrender.com")  # URL на Render
+BOT_USERNAME = os.environ.get("PidpuvasBot")  # Ім'я бота
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 openai.api_key = OPENAI_API_KEY
