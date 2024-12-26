@@ -5,8 +5,16 @@ import random
 import asyncio
 import time
 import json
+import os
 import openai
 
+
+# Отримання OpenAI API ключа
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Перевірка, чи ключ отримано
+if not OPENAI_API_KEY:
+    raise ValueError("Не знайдено OpenAI API ключ у змінних оточення.")
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -58,7 +66,7 @@ def get_openai_response(prompt):
     openai.api_key = OPENAI_API_KEY
     try:
         response = openai.Completion.create(
-            engine="text-davinci-003",  # або "gpt-4" для GPT-4
+            engine="text-davinci-003",  # Можете використати інший двигун, наприклад, "gpt-4"
             prompt=prompt,
             max_tokens=150,  # Кількість токенів у відповіді
             temperature=0.7  # Креативність відповіді
