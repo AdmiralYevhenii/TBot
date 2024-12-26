@@ -6,20 +6,14 @@ import asyncio
 import time
 import json
 import openai
-import os
-
-# Отримання OpenAI API ключа
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-if not OPENAI_API_KEY:
-    raise ValueError("Не знайдено OpenAI API ключ у змінних оточення.")
-
-openai.api_key = OPENAI_API_KEY
 
 # Токен бота
-TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
-WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
-BOT_USERNAME = "PidpuvasBot"  # Ім'я бота
+TOKEN = os.environ.get("TELEGRAM_TOKEN")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  # URL на Render
+BOT_USERNAME = os.environ.get("BOT_USERNAME")  # Ім'я бота
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+openai.api_key = OPENAI_API_KEY
 
 app = Flask(__name__)
 
@@ -62,21 +56,19 @@ def generate_shishka():
     else:
         return f"Твоя шишка {random_choice} см, їбать ти лох"
 
-def get_openai_response(prompt):
+# Функція для обробки запитів до OpenAI
+async def ask_openai(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",  # Або використовуйте "gpt-3.5-turbo" для економії коштів
+            model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Ти є корисним помічником."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=150
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ]
         )
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
-        return f"Помилка: {str(e)}"
-
+        return f"Виникла помилка під час звернення до OpenAI: {str(e)}"
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
@@ -92,14 +84,6 @@ def webhook():
         # Логування отриманого тексту
         print(f"Received message: {text}")
 
-        if text.startswith("/ask"):
-            prompt = text[len("/ask "):].strip()
-            if prompt:
-                response = get_openai_response(prompt)
-                asyncio.run(send_message(chat_id, response, message_id))
-            else:
-                asyncio.run(send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id))
-                
         # Оновлюємо кількість символів для користувача
         if username not in user_char_count:
             user_char_count[username] = 0
@@ -118,7 +102,6 @@ def webhook():
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text:
-            # Перевіряємо чи команда адресована іншому боту
             if BOT_USERNAME not in text:
                 return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
 
@@ -133,7 +116,7 @@ def webhook():
                     "/whoiam - Дізнайся хто ти\n"
                     "/shishka - Показати всім розмір твоєї шишки\n"
                     "/cocktail - Отримати випадковий коктейль\n"
-                    "/ask <запит> - Запитай у OpenAI"
+                    "/ask - Задати запитання OpenAI"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
             elif text.lower().startswith("/shishka"):
@@ -150,13 +133,17 @@ def webhook():
                     f"Як приготувати:\n{preparation}"
                 )
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
+            elif text.lower().startswith("/ask"):
+                prompt = text[5:].strip()  # Забираємо команду і залишаємо лише текст запиту
+                if prompt:
+                    openai_response = asyncio.run(ask_openai(prompt))
+                    asyncio.run(send_message(chat_id, openai_response, message_id))
+                else:
+                    asyncio.run(send_message(chat_id, "Будь ласка, введіть текст запиту після команди /ask.", message_id))
         else:
-            # Якщо це не команда, бот не реагує на повідомлення
             pass
 
     return "OK", 200
-
-            #заїбав
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
