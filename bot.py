@@ -2,21 +2,14 @@ from flask import Flask, request
 from telegram import Bot
 import os
 import random
+import asyncio
 import time
 import json
-import openai
-import asyncio
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
 WEBHOOK_URL = "https://tbot-pexl.onrender.com"  # URL на Render
 BOT_USERNAME = "PidpuvasBot"  # Ім'я бота
-
-# Ініціалізація OpenAI
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("Не знайдено OpenAI API ключ у змінних оточення.")
-openai.api_key = OPENAI_API_KEY
 
 app = Flask(__name__)
 
@@ -36,29 +29,10 @@ def load_cocktails():
     with open("cocktails.json", "r", encoding="utf-8") as file:
         return json.load(file)
 
-# Функція для відправки повідомлення
 async def send_message(chat_id, text, message_id=None):
-
-    #Асинхронна функція для відправки повідомлення як відповідь.
-
+    """Асинхронна функція для відправки повідомлення як відповідь."""
     bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
-
-# Функція для генерації відповіді OpenAI
-def get_openai_response(prompt):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # або "gpt-3.5-turbo"
-            messages=[
-                {"role": "system", "content": "Ти є корисним помічником."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=150
-        )
-        return response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        return f"Помилка: {str(e)}"
 
 # Функція для генерації шишки
 def generate_shishka():
@@ -105,41 +79,31 @@ def webhook():
 
         # Перевірка на 800 символів
         if user_char_count[username] >= 800:
-            send_message(chat_id, f"{username}, сходи попісяй", message_id)
+            asyncio.run(send_message(chat_id, f"{username}, сходи попісяй", message_id))
             user_char_count[username] = 0
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text:
-             if BOT_USERNAME not in text:
+            # Перевіряємо чи команда адресована іншому боту
+            if BOT_USERNAME not in text:
                 return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
 
         # Перевірка на команду
         if text.startswith("/"):
-            # Логування команди
-            print(f"Command received: {text}")
-
-            # Команда /whoiam
             if text.lower().startswith("/whoiam"):
                 random_response = random.choice(responses).strip()
-                send_message(chat_id, f"{random_response}", message_id)
-
-            # Команда /help
+                asyncio.run(send_message(chat_id, f"{random_response}", message_id))
             elif text.lower().startswith("/help"):
                 help_text = (
                     "Команди бота:\n"
                     "/whoiam - Дізнайся хто ти\n"
                     "/shishka - Показати всім розмір твоєї шишки\n"
-                    "/cocktail - Отримати випадковий коктейль\n"
-                    "/ask - Задати питання AI"
+                    "/cocktail - Отримати випадковий коктейль"
                 )
-                send_message(chat_id, help_text, message_id)
-
-            # Команда /shishka
+                asyncio.run(send_message(chat_id, help_text, message_id))
             elif text.lower().startswith("/shishka"):
                 shishka_response = generate_shishka()
-                send_message(chat_id, f"{shishka_response}", message_id)
-
-            # Команда /cocktail
+                asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
             elif text.lower().startswith("/cocktail"):
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
@@ -150,19 +114,14 @@ def webhook():
                     f"Складові:\n{ingredients}\n"
                     f"Як приготувати:\n{preparation}"
                 )
-                send_message(chat_id, cocktail_response, message_id)
-
-            # Команда /ask
-            elif text.lower().startswith("/ask"):
-                prompt = text[len("/ask"):].strip()
-                if not prompt:  # Якщо запит пустий
-                    send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id)
-                else:
-                    response = get_openai_response(prompt)
-                    send_message(chat_id, response, message_id)
+                asyncio.run(send_message(chat_id, cocktail_response, message_id))
+        else:
+            # Якщо це не команда, бот не реагує на повідомлення
+            pass
 
     return "OK", 200
 
+            #заїбав
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
