@@ -42,10 +42,10 @@ async def send_message(chat_id, text, message_id=None):
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 # Функція для генерації відповіді OpenAI
-def get_openai_response(prompt):
+async def get_openai_response(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-4",  # Або використовуйте "gpt-3.5-turbo"
             messages=[
                 {"role": "system", "content": "Ти є корисним помічником."},
                 {"role": "user", "content": prompt}
@@ -56,6 +56,7 @@ def get_openai_response(prompt):
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Помилка: {str(e)}"
+
 
 # Функція для генерації шишки
 def generate_shishka():
