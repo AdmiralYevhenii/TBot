@@ -42,10 +42,10 @@ async def send_message(chat_id, text, message_id=None):
     await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 # Функція для генерації відповіді OpenAI
-async def get_openai_response(prompt):
+async def fetch_openai_response(prompt):
     try:
         response = await openai.ChatCompletion.acreate(
-            model="gpt-4",  # Або використовуйте "gpt-3.5-turbo"
+            model="gpt-4o",  # або "gpt-3.5-turbo"
             messages=[
                 {"role": "system", "content": "Ти є корисним помічником."},
                 {"role": "user", "content": prompt}
@@ -56,6 +56,10 @@ async def get_openai_response(prompt):
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Помилка: {str(e)}"
+
+def get_openai_response(prompt):
+    return asyncio.run(fetch_openai_response(prompt))
+
 
 
 # Функція для генерації шишки
@@ -142,11 +146,13 @@ def webhook():
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
             elif text.lower().startswith("/ask"):
                 prompt = text[len("/ask "):].strip()
-                if not prompt:
-                    asyncio.run(send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id))
-                else:
-                    response = get_openai_response(prompt)
-                    asyncio.run(send_message(chat_id, response, message_id))
+            if prompt:
+                response = get_openai_response(prompt)
+                bot = Bot(token=TOKEN)
+                bot.send_message(chat_id=chat_id, text=response, reply_to_message_id=message_id)
+            else:
+                bot.send_message(chat_id=chat_id, text="Будь ласка, напишіть запит після команди /ask.", reply_to_message_id=message_id)
+
         else:
             # Якщо це не команда, бот не реагує на повідомлення
             pass
