@@ -38,7 +38,12 @@ def load_cocktails():
 # Функція для відправки повідомлення
 def send_message(chat_id, text, message_id=None):
     bot = Bot(token=TOKEN)
-    bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
+    try:
+        print(f"Sending message: {text} to chat_id: {chat_id}")
+        bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
+    except Exception as e:
+        print(f"Error while sending message: {e}")
+
 
 # Функція для генерації відповіді OpenAI
 def get_openai_response(prompt):
