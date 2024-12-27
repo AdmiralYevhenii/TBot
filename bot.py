@@ -118,9 +118,13 @@ def webhook():
 
         # Перевірка на команду
         if text.startswith("/"):
+
+            # Команда /whoiam
             if text.lower().startswith("/whoiam"):
                 random_response = random.choice(responses).strip()
                 asyncio.run(send_message(chat_id, f"{random_response}", message_id))
+
+            # Команда /help
             elif text.lower().startswith("/help"):
                 help_text = (
                     "Команди бота:\n"
@@ -130,9 +134,13 @@ def webhook():
                     "/ask - Задати питання AI"
                 )
                 asyncio.run(send_message(chat_id, help_text, message_id))
+
+            # Команда /shishka
             elif text.lower().startswith("/shishka"):
                 shishka_response = generate_shishka()
                 asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
+
+            # Команда /cocktail
             elif text.lower().startswith("/cocktail"):
                 cocktails = load_cocktails()
                 cocktail = random.choice(cocktails)
@@ -144,18 +152,15 @@ def webhook():
                     f"Як приготувати:\n{preparation}"
                 )
                 asyncio.run(send_message(chat_id, cocktail_response, message_id))
-            elif text.lower().startswith("/ask"):
-                prompt = text[len("/ask "):].strip()
-            if prompt:
-                response = get_openai_response(prompt)
-                bot = Bot(token=TOKEN)
-                bot.send_message(chat_id=chat_id, text=response, reply_to_message_id=message_id)
-            else:
-                bot.send_message(chat_id=chat_id, text="Будь ласка, напишіть запит після команди /ask.", reply_to_message_id=message_id)
 
-        else:
-            # Якщо це не команда, бот не реагує на повідомлення
-            pass
+            # Команда /ask
+            elif text.lower().startswith("/ask"):
+                prompt = text[len("/ask"):].strip()
+                if not prompt:  # Якщо запит пустий
+                    asyncio.run(send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id))
+                else:
+                    response = get_openai_response(prompt)
+                    asyncio.run(send_message(chat_id, response, message_id))
 
     return "OK", 200
 
