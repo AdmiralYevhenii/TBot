@@ -106,12 +106,13 @@ def webhook():
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text:
-            # Перевіряємо чи команда адресована іншому боту
             if BOT_USERNAME not in text:
                 return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
 
         # Перевірка на команду
         if text.startswith("/"):
+            # Логування команди
+            print(f"Command received: {text}")
 
             # Команда /whoiam
             if text.lower().startswith("/whoiam"):
