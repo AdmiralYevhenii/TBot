@@ -5,6 +5,7 @@ import random
 import time
 import json
 import openai
+import asyncio
 
 # Токен бота
 TOKEN = "8029573466:AAFq4B_d-s73bPG0z9kRcOAU2sE3wFwAsj4"
@@ -36,14 +37,12 @@ def load_cocktails():
         return json.load(file)
 
 # Функція для відправки повідомлення
-def send_message(chat_id, text, message_id=None):
-    bot = Bot(token=TOKEN)
-    try:
-        print(f"Sending message: {text} to chat_id: {chat_id}")
-        bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
-    except Exception as e:
-        print(f"Error while sending message: {e}")
+async def send_message(chat_id, text, message_id=None):
+    
+    #Асинхронна функція для відправки повідомлення як відповідь.
 
+    bot = Bot(token=TOKEN)
+    await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 # Функція для генерації відповіді OpenAI
 def get_openai_response(prompt):
