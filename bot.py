@@ -106,8 +106,7 @@ def webhook():
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text:
-            if BOT_USERNAME not in text:
-                return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
+            text = text.split('@')[0].strip()  # Видаляємо @ та ім'я бота
 
         # Перевірка на команду
         if text.startswith("/"):
@@ -158,6 +157,7 @@ def webhook():
                     send_message(chat_id, response, message_id)
 
     return "OK", 200
+
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
