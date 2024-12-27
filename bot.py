@@ -38,7 +38,7 @@ def load_cocktails():
 
 # Функція для відправки повідомлення
 async def send_message(chat_id, text, message_id=None):
-    
+
     #Асинхронна функція для відправки повідомлення як відповідь.
 
     bot = Bot(token=TOKEN)
@@ -110,7 +110,8 @@ def webhook():
 
         # Ігнорування команд, адресованих іншому боту
         if "@" in text:
-            text = text.split('@')[0].strip()  # Видаляємо @ та ім'я бота
+             if BOT_USERNAME not in text:
+                return "OK", 200  # Ігноруємо команду, якщо вона для іншого бота
 
         # Перевірка на команду
         if text.startswith("/"):
