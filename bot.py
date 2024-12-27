@@ -2,7 +2,6 @@ from flask import Flask, request
 from telegram import Bot
 import os
 import random
-import asyncio
 import time
 import json
 import openai
@@ -36,16 +35,16 @@ def load_cocktails():
     with open("cocktails.json", "r", encoding="utf-8") as file:
         return json.load(file)
 
-async def send_message(chat_id, text, message_id=None):
-    """Асинхронна функція для відправки повідомлення як відповідь."""
+# Функція для відправки повідомлення
+def send_message(chat_id, text, message_id=None):
     bot = Bot(token=TOKEN)
-    await bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
+    bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=message_id)
 
 # Функція для генерації відповіді OpenAI
-async def fetch_openai_response(prompt):
+def get_openai_response(prompt):
     try:
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-4o",  # або "gpt-3.5-turbo"
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # або "gpt-3.5-turbo"
             messages=[
                 {"role": "system", "content": "Ти є корисним помічником."},
                 {"role": "user", "content": prompt}
@@ -56,11 +55,6 @@ async def fetch_openai_response(prompt):
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Помилка: {str(e)}"
-
-def get_openai_response(prompt):
-    return asyncio.run(fetch_openai_response(prompt))
-
-
 
 # Функція для генерації шишки
 def generate_shishka():
@@ -107,7 +101,7 @@ def webhook():
 
         # Перевірка на 800 символів
         if user_char_count[username] >= 800:
-            asyncio.run(send_message(chat_id, f"{username}, сходи попісяй", message_id))
+            send_message(chat_id, f"{username}, сходи попісяй", message_id)
             user_char_count[username] = 0
 
         # Ігнорування команд, адресованих іншому боту
@@ -122,7 +116,7 @@ def webhook():
             # Команда /whoiam
             if text.lower().startswith("/whoiam"):
                 random_response = random.choice(responses).strip()
-                asyncio.run(send_message(chat_id, f"{random_response}", message_id))
+                send_message(chat_id, f"{random_response}", message_id)
 
             # Команда /help
             elif text.lower().startswith("/help"):
@@ -133,12 +127,12 @@ def webhook():
                     "/cocktail - Отримати випадковий коктейль\n"
                     "/ask - Задати питання AI"
                 )
-                asyncio.run(send_message(chat_id, help_text, message_id))
+                send_message(chat_id, help_text, message_id)
 
             # Команда /shishka
             elif text.lower().startswith("/shishka"):
                 shishka_response = generate_shishka()
-                asyncio.run(send_message(chat_id, f"{shishka_response}", message_id))
+                send_message(chat_id, f"{shishka_response}", message_id)
 
             # Команда /cocktail
             elif text.lower().startswith("/cocktail"):
@@ -151,20 +145,18 @@ def webhook():
                     f"Складові:\n{ingredients}\n"
                     f"Як приготувати:\n{preparation}"
                 )
-                asyncio.run(send_message(chat_id, cocktail_response, message_id))
+                send_message(chat_id, cocktail_response, message_id)
 
             # Команда /ask
             elif text.lower().startswith("/ask"):
                 prompt = text[len("/ask"):].strip()
                 if not prompt:  # Якщо запит пустий
-                    asyncio.run(send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id))
+                    send_message(chat_id, "Будь ласка, напишіть запит після команди /ask.", message_id)
                 else:
                     response = get_openai_response(prompt)
-                    asyncio.run(send_message(chat_id, response, message_id))
+                    send_message(chat_id, response, message_id)
 
     return "OK", 200
-
-            #заїбав
 
 if __name__ == "__main__":
     bot = Bot(token=TOKEN)
